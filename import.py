@@ -21,9 +21,8 @@ from optparse import OptionParser
 
 # The encoding for input, output and internal representation. Leave alone.
 ENCODING = 'UTF-8'
-# The XML namespace we support.
-XMLNS = 'http://www.mediawiki.org/xml/export-0.4/'
-
+# The XML namespaces we support.
+XMLNS = ['http://www.mediawiki.org/xml/export-0.4/', 'http://www.mediawiki.org/xml/export-0.6/']
 
 def tzoffset():
 	r = time.strftime('%z')
@@ -109,7 +108,7 @@ class Meta:
 
 class StringStore:
 	def __init__(self, file):
-		self.struct = struct.Struct('=Bb255s')
+		self.struct = struct.Struct('=Bh255s')
 		self.maxid = -1
 		self.fh = open(file, 'wb+')
 	def write(self, id, text, flags = 1):
@@ -305,13 +304,13 @@ class BlobWriter:
 				raise
 	def runHandler(self, name, attrs):
 		# Check the namespace.
-		if not name[0] == XMLNS:
+		if not name[0] in XMLNS:
 			if self.hpos > 0:
 				# If this is not the root element, simply ignore it.
 				return
 			else:
 				# If this is the root element, refuse to parse it.
-				raise XMLError('XML document needs to be in MediaWiki Export Format 0.4')
+				raise XMLError('XML document needs to be in MediaWiki Export Format 0.4 or 0.6')
 		# If there is no handler, this tag shall be ignored.
 		if self.handler == None:
 			return
